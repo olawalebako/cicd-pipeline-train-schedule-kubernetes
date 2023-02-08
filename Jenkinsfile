@@ -2,7 +2,7 @@ pipeline {
     agent any
     environment {
         //be sure to replace "willbla" with your own Docker Hub username
-        DOCKER_IMAGE_NAME = "afeeztyler98/train-schedule"
+        DOCKERHUB_CREDENTIALS=credentials('dockerhubpwd')
     }
     stages {
         stage('Build') {
@@ -18,24 +18,25 @@ pipeline {
             }
             steps {
                 script {
-                    app = docker.build(DOCKER_IMAGE_NAME)
-                    app.inside {
-                        sh 'echo Hello, World!'
+                    sh 'docker build -t afeeztyler98/train-schedule .'
                     }
                 }
             }
         }
+        stage('login to DockerHub'){
+            when {
+                branch 'master'
+            }
+            steps {
+				    sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
+			    }
+            }
         stage('Push Docker Image') {
             when {
                 branch 'master'
             }
             steps {
-                script {
-                    docker.withRegistry('https://registry.hub.docker.com', 'dockerhubpwd') {
-                        app.push("${env.BUILD_NUMBER}")
-                        app.push("latest")
-                    }
-                }
+                sh 'docker push afeeztyler98/train-schedule'
             }
         }
         stage('DeployToProduction') {
