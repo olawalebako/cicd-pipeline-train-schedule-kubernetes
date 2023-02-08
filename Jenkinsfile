@@ -22,7 +22,6 @@ pipeline {
                     }
                 }
             }
-        }
         stage('login to DockerHub'){
             when {
                 branch 'master'
@@ -53,6 +52,6 @@ pipeline {
                 )
             }
         }
-    
+    }
 }
 
